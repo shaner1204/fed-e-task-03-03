@@ -43,7 +43,7 @@
                 <nuxt-link 
                   class="nav-link"
                   :class="{
-                    active: tab === 'Global Feed'
+                    active: tab === 'tag'
                   }"
                   exact 
                   :to="{
@@ -80,10 +80,12 @@
                 }">
                   {{article.author.username}}
                 </nuxt-link>
-                <span class="date">{{article.createdAt}}</span>
+                <span class="date">{{article.createdAt | date('MMM DD, YYYY')}}</span>
               </div>
               <button class="btn btn-outline-primary btn-sm pull-xs-right"
                 :class="{active: article.favorited}"
+                @click="onFavorite(article)"
+                :disabled="article.favoriteDisabled"
               >
                 <i class="ion-heart"></i> {{article.favoritesCount}}
               </button>
@@ -100,6 +102,11 @@
               <h1>{{article.title}}</h1>
               <p>{{article.description}}</p>
               <span>Read more...</span>
+              <ul class="tag-list">
+                <li class="tag-default tag-pill tag-outline" v-for="(tag, index) in article.tagList" :key="index">
+                  {{tag}}
+                </li>
+              </ul>
             </nuxt-link>
           </div>
 
@@ -120,7 +127,8 @@
                     name: 'home',
                     query: {
                       page: item,
-                      tag: $route.query.tag
+                      tag: $route.query.tag,
+                      tab: tab
                     }
                   }"
                 >{{item}}</nuxt-link>
@@ -158,7 +166,7 @@
 </template>
 
 <script>
-import { getArticles, getYourFeedArticles } from '@/api/article'
+import { getArticles, getYourFeedArticles, addFavorite, deleteFavorite } from '@/api/article'
 import { getTags } from '@/api/tag'
 import { mapState } from 'vuex'
 export default {
@@ -186,17 +194,19 @@ export default {
     ])
     const { articles, articlesCount } = articleRes.data
     const { tags } = tagRes.data
+    articles.forEach(article => article.favoriteDisabled = false)
+    console.log(articles, 'articles')
     return {
       // articles: data.articles,
       // articlesCount: data.articlesCount,
       // tags: tagData.tags,
-      articles,
-      articlesCount,
-      tags,
-      limit,
-      page,
-      tab,
-      tag
+      articles, // 文章列表
+      articlesCount, // 文章总数
+      tags, // 标签列表
+      limit, // 每页大小
+      page, // 页码
+      tab, // 选项卡
+      tag // 数据标签
     }
   },
   watchQuery: ['page', 'tag', 'tab'],
@@ -204,6 +214,24 @@ export default {
     ...mapState(['user']),
     totalPage () {
       return Math.ceil(this.articlesCount / this.limit)
+    }
+  },
+  methods: {
+    async onFavorite (article) {
+      console.log(article)
+      article.favoriteDisabled = true
+      if (article.favorited) {
+        // 取消点赞
+        await deleteFavorite(article.slug)
+        article.favorited = false
+        article.favoritesCount += -1
+      } else {
+        // 添加点赞
+        await addFavorite(article.slug)
+        article.favorited = true
+        article.favoritesCount += 1
+      }
+      article.favoriteDisabled = false
     }
   }
 }

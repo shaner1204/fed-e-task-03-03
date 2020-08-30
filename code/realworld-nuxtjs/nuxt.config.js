@@ -54,5 +54,12 @@ module.exports = {
                 }
             ])
         }
-    }
+    },
+
+    // 注册插件
+    plugins: [
+        // 路径模块： ~ 开头，相当于从根目录出发
+        '~/plugins/request.js',
+        '~/plugins/dayjs.js'
+    ]
 }
