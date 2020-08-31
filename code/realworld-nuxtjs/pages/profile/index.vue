@@ -37,29 +37,65 @@
         <div class="articles-toggle">
           <ul class="nav nav-pills outline-active">
             <li class="nav-item">
-              <a class="nav-link active" href="">My Articles</a>
+              <nuxt-link class="nav-link active"
+                :to="{
+                  name: 'profile',
+                  query: {
+                    tab: 'my_articles'
+                  }
+                }"
+              >My Articles
+              </nuxt-link>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="">Favorited Articles</a>
+              <nuxt-link class="nav-link"
+              :to="{
+                name: 'profile',
+                query: {
+                  tab: 'favorited_articles'
+                }
+              }"
+              >Favorited Articles
+              </nuxt-link>
             </li>
           </ul>
         </div>
 
-        <div class="article-preview">
+        <div class="article-preview" v-for="article in articles" :key="article.slug">
           <div class="article-meta">
-            <a href=""><img src="http://i.imgur.com/Qr71crq.jpg" /></a>
+            <nuxt-link
+              :to="{
+                name: 'profile',
+                params: {
+                  username: article.author.username
+                }
+              }"
+            >
+              <img :src="article.author.image" />
+            </nuxt-link>
             <div class="info">
-              <a href="" class="author">{{profile.username}}</a>
-              <span class="date">January 20th</span>
+              <nuxt-link class="author"
+                :to="{
+                  name: 'profile',
+                  params: {
+                    username: article.author.username
+                  }
+                }"
+              >
+                {{article.author.username}}</nuxt-link>
+              <span class="date">{{article.createdAt | date('MMM DD, YYYY')}}</span>
             </div>
             <button class="btn btn-outline-primary btn-sm pull-xs-right">
-              <i class="ion-heart"></i> 29
+              <i class="ion-heart"></i> {{article.favoritesCount}}
             </button>
           </div>
           <a href="" class="preview-link">
-            <h1>How to build webapps that scale</h1>
-            <p>This is the description for the post.</p>
+            <h1>{{article.title}}</h1>
+            <p>{{article.description}}</p>
             <span>Read more...</span>
+            <ul class="tag-list" v-for="(tag, index) in article.tagList" :key="index">
+              <li class="tag-default tag-pill tag-outline">{{tag}}</li>
+            </ul>
           </a>
         </div>
 
@@ -108,16 +144,26 @@ export default {
         image: '', 
         username: '',
         following: false
-      }
+      },
+      articles: []
     }
   },
   created () {
     this.getUserProfileFn()
   },
+  watchQuery: ['tab'],
   methods: {
     async getUserProfileFn () {
       const { data } = await getUserProfile(this.$route.params.username)
       this.profile = data.profile
+      this.articlesListFn()
+    },
+    async articlesListFn () {
+      const articleTab = !this.$route.query.tab ? 'my_articles' : this.$route.query.tab
+      console.log(articleTab, 'tab')
+      const { data: myArticleData } = articleTab === 'my_articles' ? await getArticles({author: this.profile.username}) : await getArticles({favorited: this.profile.username})
+      this.articles = myArticleData.articles
+      console.log(this.articles, '我的文章')
     }
   }
 }
