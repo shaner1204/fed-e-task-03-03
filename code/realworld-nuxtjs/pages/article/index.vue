@@ -6,7 +6,7 @@
 
       <h1>{{article.title}}</h1>
 
-      <article-meta :article="article" />
+      <article-meta :article="article"/>
 
     </div>
   </div>
@@ -53,9 +53,8 @@ import ArticleComment from './components/article-comments'
 export default {
   name: 'ArticleIndex',
   async asyncData ({ params }) {
-    console.log(params, 'params')
     const { data } = await getArticle(params.slug)
-    console.log(data, '文章详情')
+    console.log(data, '文章详情-getarticle')
     const { article } = data
     const md = new MarkdownIt()
     article.body = md.render(article.body)

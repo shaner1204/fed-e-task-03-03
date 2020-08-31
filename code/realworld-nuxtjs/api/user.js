@@ -17,3 +17,29 @@ export const register = data => {
         data
     })
 }
+
+// 获取当前用户
+export const getUser = params => {
+    return request({
+        method: 'GET',
+        url: '/api/user',
+        params
+    })
+}
+
+// 更新当前用户信息
+export const updateUserApi = data => {
+    return request({
+        method: 'PUT',
+        url: '/api/user',
+        data
+    })
+}
+
+// 获取用户简介
+export const getUserProfile = username => {
+    return request({
+        method: 'GET',
+        url: `/api/profiles/${username}`
+    })
+}

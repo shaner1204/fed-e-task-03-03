@@ -46,7 +46,10 @@
             <span class="date-posted">{{comment.createdAt | date('MMM DD, YYYY')}}</span>
             <span class="mod-options">
               <!-- <i class="ion-edit"></i> -->
-              <i class="ion-trash-a"></i>
+              <i class="ion-trash-a" 
+                v-if="user.username === comment.author.username" 
+                @click="delCommentFn(article, comment.id)"
+              ></i>
             </span>
           </div>
         </div>
@@ -55,7 +58,8 @@
 </template>
 
 <script>
-import { getArticleComments, addArticleComments } from '@/api/article'
+import { getArticleComments, addArticleComments, deleteComment } from '@/api/article'
+import { mapState } from 'vuex'
 export default {
     name: 'ArticleComments',
     data () {
@@ -70,7 +74,11 @@ export default {
         required: true
       }
     },
+    computed: {
+      ...mapState(['user'])
+    },
     created () {
+      console.log(this.user, 'user')
       this.commnetList()
     },
     // async mounted () {
@@ -80,19 +88,30 @@ export default {
     methods: {
       async commnetList () {
         const { data } = await getArticleComments(this.article.slug)
+        console.log(data.comments, '评论列表')
         this.comments = data.comments
       },
       async addComment (article) {
-        const { data } = await addArticleComments(article, {
-          comment: {
-            body: this.commentTxt
-          }
-        })
-        const { commnetId } = data.comments.id
-        if (id) {
+        try {
+          const { data } = await addArticleComments(article, {
+            comment: {
+              body: this.commentTxt
+            }
+          })
+          this.commentTxt = ''
           this.commnetList()
+        } catch (err) {
+          console.log(err.response.data.errors)
         }
-        console.log(data, '添加评论返回 data')
+        
+      },
+      async delCommentFn (article, id) {
+        try {
+          const { data } = await deleteComment(article.slug, id)
+          this.commnetList()
+        } catch (err) {
+          console.log(err.response.data.errors)
+        }
       }
     }
 }

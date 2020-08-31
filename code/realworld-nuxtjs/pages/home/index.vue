@@ -147,7 +147,6 @@
                 :to="{
                   name: 'home',
                   query: {
-                    tab: 'tag',
                     tag: item
                   }
                 }" 
@@ -194,8 +193,11 @@ export default {
     ])
     const { articles, articlesCount } = articleRes.data
     const { tags } = tagRes.data
-    articles.forEach(article => article.favoriteDisabled = false)
-    console.log(articles, 'articles')
+    articles.forEach(article => {
+      article.favoriteDisabled = false
+      article.followDisabled = false
+    })
+    // console.log(articles, 'articles')
     return {
       // articles: data.articles,
       // articlesCount: data.articlesCount,

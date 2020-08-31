@@ -7,15 +7,23 @@
 
         <div class="col-xs-12 col-md-10 offset-md-1">
           <img src="http://i.imgur.com/Qr71crq.jpg" class="user-img" />
-          <h4>Eric Simons</h4>
+          <h4>{{profile.username}}</h4>
           <p>
-            Cofounder @GoThinkster, lived in Aol's HQ for a few months, kinda looks like Peeta from the Hunger Games
+            {{profile.bio}}
           </p>
-          <button class="btn btn-sm btn-outline-secondary action-btn">
+          <nuxt-link 
+            class="btn btn-sm btn-outline-secondary action-btn" 
+            :to="{
+              name: 'settings'
+            }"
+          >
+            <i class="ion-gear-a"></i> Edit Profile Settings
+          </nuxt-link>
+          <!-- <button class="btn btn-sm btn-outline-secondary action-btn">
             <i class="ion-plus-round"></i>
             &nbsp;
-            Follow Eric Simons 
-          </button>
+            Follow {{profile.username}}
+          </button> -->
         </div>
 
       </div>
@@ -41,7 +49,7 @@
           <div class="article-meta">
             <a href=""><img src="http://i.imgur.com/Qr71crq.jpg" /></a>
             <div class="info">
-              <a href="" class="author">Eric Simons</a>
+              <a href="" class="author">{{profile.username}}</a>
               <span class="date">January 20th</span>
             </div>
             <button class="btn btn-outline-primary btn-sm pull-xs-right">
@@ -87,10 +95,31 @@
 </template>
 
 <script>
+import { getUserProfile } from '@/api/user'
+import { getArticles } from '@/api/article'
 export default {
   // 在路由匹配组件渲染之前 会先执行中间件
   middleware: 'authenticated',
-  name: 'ProfileIndex'
+  name: 'ProfileIndex',
+  data () {
+    return {
+      profile: {
+        bio: '', // 个人经历
+        image: '', 
+        username: '',
+        following: false
+      }
+    }
+  },
+  created () {
+    this.getUserProfileFn()
+  },
+  methods: {
+    async getUserProfileFn () {
+      const { data } = await getUserProfile(this.$route.params.username)
+      this.profile = data.profile
+    }
+  }
 }
 </script>
 

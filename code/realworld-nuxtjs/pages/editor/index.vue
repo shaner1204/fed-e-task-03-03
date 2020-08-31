@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { publishArticleApi } from '@/api/article'
+import { publishArticleApi, getArticle, updateArticleApi } from '@/api/article'
 export default {
   // 在路由匹配组件渲染之前 会先执行中间件
   middleware: 'authenticated',
@@ -55,13 +55,23 @@ export default {
       errors: {} // 错误信息
     }
   },
+  computed: {
+    isUpdate () {
+      return this.$route.params.slug ? this.$route.params.slug : ''
+    }
+  },
+  created () {
+    if (this.isUpdate) {
+      this.getArticleFn()
+    }
+  },
   methods: {
     async publishArticle () {
       try {
         const tagList = this.tags.split(' ')
         this.article.tagList = tagList
         console.log(this.article, 'article')
-        const { data } = await publishArticleApi({ article: this.article })
+        const { data } = this.isUpdate !== '' ? await updateArticleApi(this.$route.params.slug, this.article) : await publishArticleApi({ article: this.article })
         if (data.article.author) {
           this.$router.push('/')
         }
@@ -69,6 +79,11 @@ export default {
         console.log(err)
         this.errors = err.response.data.errors
       }
+    },
+    async getArticleFn () {
+      const { data } = await getArticle(this.$route.params.slug)
+      this.article = data.article
+      this.tags = data.article.tagList.join(' ')
     }
   }
 }

@@ -55,14 +55,25 @@ export const getArticleComments = slug => {
     })
 }
 
+// 添加关注
+export const addFollow = username => {
+    return request({
+        method: 'POST',
+        url: `/api/profiles/${username}/follow`
+    })
+}
+
+// 取消关注
+export const deleteFollow = username => {
+    return request({
+        method: 'DELETE',
+        url: `/api/profiles/${username}/follow`
+    })
+}
+
 // 添加文章评论
 export const addArticleComments = (article, params) => {
-    console.log(params, '添加评论参数')
-    console.log(article, '添加评论参数')
-    // const { article } = params
     const { comment } = params
-    // console.log(params, 'comment')
-    // console.log(params.comment, 'params.comment')
     return request({
         method: 'POST',
         url: `/api/articles/${article.slug}/comments`,
@@ -72,12 +83,38 @@ export const addArticleComments = (article, params) => {
     })
 }
 
+// 删除评论
+export const deleteComment = (slug, id) => {
+    return request({
+        method: 'DELETE',
+        url: `/api/articles/${slug}/comments/${id}`
+    })
+}
+
 // 发布文章
 export const publishArticleApi = data => {
-    console.log(data)
     return request({
         method: 'POST',
         url: '/api/articles',
         data
+    })
+}
+
+// 删除文章
+export const deleteArticleApi = slug => {
+    return request({
+        method: 'DELETE',
+        url: `/api/articles/${slug}`
+    })
+}
+
+// 更新文章
+export const updateArticleApi = (slug, article) => {
+    return request({
+        method: 'PUT',
+        url: `/api/articles/${slug}`,
+        data: {
+            article
+        }
     })
 }
