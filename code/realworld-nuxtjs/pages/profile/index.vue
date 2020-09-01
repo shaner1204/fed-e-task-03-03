@@ -37,30 +37,32 @@
         <div class="articles-toggle">
           <ul class="nav nav-pills outline-active">
             <li class="nav-item">
-              <nuxt-link class="nav-link"
+              <nuxt-link 
+                class="nav-link"
                 :class="{
                   active: tab === 'my_articles'
                 }"
                 exact
                 :to="{
                   name: 'profile',
-                  params: 'my_articles'
-                }"
-              >My Articles</nuxt-link>
+                  query: {
+                    tab: 'my_articles'
+                  }
+                }">My Articles</nuxt-link>
             </li>
             <li class="nav-item">
-              <nuxt-link class="nav-link"
+              <nuxt-link 
+                class="nav-link"
                 :class="{
                   active: tab === 'favorited_articles'
                 }"
                 exact
                 :to="{
                   name: 'profile',
-                  params: {
+                  query: {
                     tab: 'favorited_articles'
                   }
-                }"
-              >Favorited Articles</nuxt-link>
+                }">Favorited Articles</nuxt-link>
             </li>
           </ul>
         </div>
@@ -110,7 +112,7 @@
           </nuxt-link>
         </div>
         <!-- 分页列表 -->
-          <!-- <nav>
+          <nav>
             <ul class="pagination">
               <li 
                 class="page-item"
@@ -123,17 +125,16 @@
                 <nuxt-link 
                   class="page-link" 
                   :to="{
-                    name: 'home',
+                    name: 'profile',
                     query: {
                       page: item,
-                      tag: $route.query.tag,
                       tab: tab
                     }
                   }"
                 >{{item}}</nuxt-link>
               </li>
             </ul>
-          </nav> -->
+          </nav>
         <!-- 分页列表 -->
 
       </div>
@@ -152,17 +153,38 @@ export default {
   middleware: 'authenticated',
   name: 'ProfileIndex',
   async asyncData (context) {
-    const tab = context.query.tab || 'my_article'
+    console.log(context.query)
+    const page = Number.parseInt(context.query.page || 1)
+    const limit = 2
+    const tab = context.query.tab || 'my_articles'
     const { data } = await getUserProfile(context.route.params.username)
     const { profile } = data
-    const atricles = tab === 'favorited_articles' ? await getArticles({favorited: profile.username}) : await getArticles({author: profile.username})
-    console.log(atricles)
+    const atriclesData = tab === 'favorited_articles' ? 
+      await getArticles({
+        favorited: profile.username, 
+        limit,
+        offset: (page - 1) * 2
+      }) : await getArticles({
+        author: profile.username,
+        limit,
+        offset: (page - 1) * 2
+      })
+    const { articles, articlesCount } = atriclesData.data
     return {
-      tab,
+      tab: tab,
       profile: data.profile,
-      articles: atricles.data.articles
+      articles,
+      articlesCount,
+      limit,
+      page
     }
   },
+  watchQuery: ['tab', 'page'],
+  computed: {
+    totalPage () {
+      return Math.ceil(this.articlesCount / this.limit)
+    }
+  }
 }
 </script>
 

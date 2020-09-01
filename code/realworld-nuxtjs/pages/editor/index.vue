@@ -15,18 +15,18 @@
         <form @submit.prevent="publishArticle">
           <fieldset>
             <fieldset class="form-group">
-                <input type="text" class="form-control form-control-lg" placeholder="Article Title" v-model="article.title" required>
+                <input type="text" class="form-control form-control-lg" placeholder="Article Title" v-model="article.title" required :disabled="inputDisabled">
             </fieldset>
             <fieldset class="form-group">
-                <input type="text" class="form-control" placeholder="What's this article about?" v-model="article.description" required>
+                <input type="text" class="form-control" placeholder="What's this article about?" v-model="article.description" required :disabled="inputDisabled">
             </fieldset>
             <fieldset class="form-group">
-                <textarea class="form-control" rows="8" placeholder="Write your article (in markdown)" v-model="article.body" required></textarea>
+                <textarea class="form-control" rows="8" placeholder="Write your article (in markdown)" v-model="article.body" required :disabled="inputDisabled"></textarea>
             </fieldset>
             <fieldset class="form-group">
-                <input type="text" class="form-control" placeholder="Enter tags" v-model="tags"><div class="tag-list"></div>
+                <input type="text" class="form-control" placeholder="Enter tags" v-model="tags" :disabled="inputDisabled"><div class="tag-list"></div>
             </fieldset>
-            <button class="btn btn-lg pull-xs-right btn-primary">
+            <button class="btn btn-lg pull-xs-right btn-primary" :disabled="inputDisabled">
                 Publish Article
             </button>
           </fieldset>
@@ -52,7 +52,8 @@ export default {
         description: '',
         body: '',
       },
-      errors: {} // 错误信息
+      errors: {}, // 错误信息
+      inputDisabled: false
     }
   },
   computed: {
@@ -68,11 +69,13 @@ export default {
   methods: {
     async publishArticle () {
       try {
+        this.inputDisabled = true
         const tagList = this.tags.split(' ')
         this.article.tagList = tagList
         console.log(this.article, 'article')
         const { data } = this.isUpdate !== '' ? await updateArticleApi(this.$route.params.slug, this.article) : await publishArticleApi({ article: this.article })
         if (data.article.author) {
+          this.inputDisabled = false
           this.$router.push('/')
         }
       } catch (err) {

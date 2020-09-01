@@ -43,7 +43,7 @@
                 <nuxt-link 
                   class="nav-link"
                   :class="{
-                    active: tab === 'tag'
+                    active: tag !== ''
                   }"
                   exact 
                   :to="{
@@ -56,87 +56,89 @@
               </li>
             </ul>
           </div>
-
-          <div 
-            class="article-preview"
-            v-for="article in articles"
-            :key="article.slug"
-          >
-            <div class="article-meta">
-              <nuxt-link :to="{
-                name: 'profile',
-                params: {
-                  username: article.author.username
-                }
-              }">
-                <img :src="article.author.image" />
-              </nuxt-link>
-              <div class="info">
-                <nuxt-link class="author" :to="{
+          <div>
+            <div 
+              class="article-preview"
+              v-for="article in articles"
+              :key="article.slug"
+            >
+              <div class="article-meta">
+                <nuxt-link :to="{
                   name: 'profile',
                   params: {
                     username: article.author.username
                   }
                 }">
-                  {{article.author.username}}
+                  <img :src="article.author.image" />
                 </nuxt-link>
-                <span class="date">{{article.createdAt | date('MMM DD, YYYY')}}</span>
+                <div class="info">
+                  <nuxt-link class="author" :to="{
+                    name: 'profile',
+                    params: {
+                      username: article.author.username
+                    }
+                  }">
+                    {{article.author.username}}
+                  </nuxt-link>
+                  <span class="date">{{article.createdAt | date('MMM DD, YYYY')}}</span>
+                </div>
+                <button class="btn btn-outline-primary btn-sm pull-xs-right"
+                  :class="{active: article.favorited}"
+                  @click="onFavorite(article)"
+                  :disabled="article.favoriteDisabled"
+                >
+                  <i class="ion-heart"></i> {{article.favoritesCount}}
+                </button>
               </div>
-              <button class="btn btn-outline-primary btn-sm pull-xs-right"
-                :class="{active: article.favorited}"
-                @click="onFavorite(article)"
-                :disabled="article.favoriteDisabled"
+              <nuxt-link
+              class="preview-link"
+              :to="{
+                name: 'article',
+                params: {
+                  slug: article.slug
+                }
+              }"
               >
-                <i class="ion-heart"></i> {{article.favoritesCount}}
-              </button>
+                <h1>{{article.title}}</h1>
+                <p>{{article.description}}</p>
+                <span>Read more...</span>
+                <ul class="tag-list">
+                  <li class="tag-default tag-pill tag-outline" v-for="(tag, index) in article.tagList" :key="index">
+                    {{tag}}
+                  </li>
+                </ul>
+              </nuxt-link>
             </div>
-            <nuxt-link
-             class="preview-link"
-             :to="{
-               name: 'article',
-               params: {
-                 slug: article.slug
-               }
-             }"
-            >
-              <h1>{{article.title}}</h1>
-              <p>{{article.description}}</p>
-              <span>Read more...</span>
-              <ul class="tag-list">
-                <li class="tag-default tag-pill tag-outline" v-for="(tag, index) in article.tagList" :key="index">
-                  {{tag}}
+
+            <!-- 分页列表 -->
+            <nav>
+              <ul class="pagination">
+                <li 
+                  class="page-item"
+                  :class="{
+                    active : item === page
+                  }"
+                  v-for="item in totalPage"
+                  :key="item"
+                >
+                  <nuxt-link 
+                    class="page-link" 
+                    :to="{
+                      name: 'home',
+                      query: {
+                        page: item,
+                        tag: $route.query.tag,
+                        tab: tab
+                      }
+                    }"
+                  >{{item}}</nuxt-link>
                 </li>
               </ul>
-            </nuxt-link>
+            </nav>
+            <!-- 分页列表 -->
           </div>
-
-          <!-- 分页列表 -->
-          <nav>
-            <ul class="pagination">
-              <li 
-                class="page-item"
-                :class="{
-                  active : item === page
-                }"
-                v-for="item in totalPage"
-                :key="item"
-              >
-                <nuxt-link 
-                  class="page-link" 
-                  :to="{
-                    name: 'home',
-                    query: {
-                      page: item,
-                      tag: $route.query.tag,
-                      tab: tab
-                    }
-                  }"
-                >{{item}}</nuxt-link>
-              </li>
-            </ul>
-          </nav>
-          <!-- 分页列表 -->
-        </div>
+          </div>
+          
 
         <div class="col-md-3">
           <div class="sidebar">

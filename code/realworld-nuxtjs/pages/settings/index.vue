@@ -9,21 +9,21 @@
         <form>
           <fieldset>
               <fieldset class="form-group">
-                <input class="form-control" type="text" placeholder="URL of profile picture" v-model="user.image">
+                <input class="form-control" type="text" placeholder="URL of profile picture" v-model="user.image" :disabled="inputDisabled">
               </fieldset>
               <fieldset class="form-group">
-                <input class="form-control form-control-lg" type="text" placeholder="Your Name" v-model="user.username">
+                <input class="form-control form-control-lg" type="text" placeholder="Your Name" v-model="user.username" :disabled="inputDisabled">
               </fieldset>
               <fieldset class="form-group">
-                <textarea class="form-control form-control-lg" rows="8" placeholder="Short bio about you" v-model='user.bio'></textarea>
+                <textarea class="form-control form-control-lg" rows="8" placeholder="Short bio about you" v-model='user.bio' :disabled="inputDisabled"></textarea>
               </fieldset>
               <fieldset class="form-group">
-                <input class="form-control form-control-lg" type="text" placeholder="Email" v-model="user.email">
+                <input class="form-control form-control-lg" type="text" placeholder="Email" v-model="user.email" :disabled="inputDisabled">
               </fieldset>
               <fieldset class="form-group">
-                <input class="form-control form-control-lg" type="password" placeholder="New Password">
+                <input class="form-control form-control-lg" type="password" placeholder="New Password" v-model="user.password" :disabled="inputDisabled">
               </fieldset>
-              <button class="btn btn-lg btn-primary pull-xs-right" @click.prevent="updateUserFn">
+              <button class="btn btn-lg btn-primary pull-xs-right" @click.prevent="updateUserFn" :disabled="inputDisabled">
                 Update Settings
               </button>
           </fieldset>
@@ -53,8 +53,10 @@ export default {
         image: '',
         username: '',
         bio: '',
-        email: ''
-      }
+        email: '',
+        password: ''
+      },
+      inputDisabled: false
     }
   },
   created () {
@@ -67,10 +69,12 @@ export default {
     },
     async updateUserFn () {
       try {
+        this.inputDisabled = true
         const { data } = await updateUserApi({ user:this.user })
-        const { user } = data
-        console.log(data, '修改用户信息')
-        this.$router.push({name: 'profile', query: {username: user.username}})
+        // const { user: userData } = data
+        // console.log(userData, '修改用户信息')
+        this.inputDisabled = false
+        this.$router.push({name: 'profile', params: {username: this.user.username}})
       } catch (err) {
         console.log(err)
       }
