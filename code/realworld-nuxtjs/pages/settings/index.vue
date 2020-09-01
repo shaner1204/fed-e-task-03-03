@@ -64,7 +64,6 @@ export default {
     async getUserFn () {
       const { data } = await getUser()
       this.user = data.user
-      console.log(data, 'data-----getuser')
     },
     async updateUserFn () {
       try {
@@ -77,7 +76,9 @@ export default {
       }
     },
     logoutFn () {
-      Cookie.set('user', '')
+      this.$store.commit('setUser', '') 
+      Cookie.remove('user')
+      this.$router.push('/')
     }
   }
 }
