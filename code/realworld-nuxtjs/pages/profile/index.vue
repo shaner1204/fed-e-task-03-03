@@ -91,7 +91,10 @@
                 {{article.author.username}}</nuxt-link>
               <span class="date">{{article.createdAt | date('MMM DD, YYYY')}}</span>
             </div>
-            <button class="btn btn-outline-primary btn-sm pull-xs-right">
+            <button class="btn btn-outline-primary btn-sm pull-xs-right"
+              @click="onFavorite(article)"
+              :disabled="article.favoriteDisabled"
+            >
               <i class="ion-heart"></i> {{article.favoritesCount}}
             </button>
           </div>
@@ -147,15 +150,14 @@
 
 <script>
 import { getUserProfile } from '@/api/user'
-import { getArticles } from '@/api/article'
+import { getArticles, addFavorite, deleteFavorite } from '@/api/article'
 export default {
   // 在路由匹配组件渲染之前 会先执行中间件
   middleware: 'authenticated',
   name: 'ProfileIndex',
   async asyncData (context) {
-    console.log(context.query)
     const page = Number.parseInt(context.query.page || 1)
-    const limit = 2
+    const limit = 3
     const tab = context.query.tab || 'my_articles'
     const { data } = await getUserProfile(context.route.params.username)
     const { profile } = data
@@ -163,13 +165,17 @@ export default {
       await getArticles({
         favorited: profile.username, 
         limit,
-        offset: (page - 1) * 2
+        offset: (page - 1) * limit
       }) : await getArticles({
         author: profile.username,
         limit,
-        offset: (page - 1) * 2
+        offset: (page - 1) * limit
       })
     const { articles, articlesCount } = atriclesData.data
+    articles.forEach(article => {
+      article.favoriteDisabled = false
+      article.followDisabled = false
+    })
     return {
       tab: tab,
       profile: data.profile,
@@ -183,6 +189,28 @@ export default {
   computed: {
     totalPage () {
       return Math.ceil(this.articlesCount / this.limit)
+    }
+  },
+  methods: {
+    async onFavorite (article) {
+      article.favoriteDisabled = true
+      if (article.favorited) {
+        // 取消点赞
+        await deleteFavorite(article.slug)
+        article.favorited = false
+        article.favoritesCount += -1
+      } else {
+        // 添加点赞
+        await addFavorite(article.slug)
+        article.favorited = true
+        article.favoritesCount += 1
+      }
+      article.favoriteDisabled = false
+    }
+  },
+  head () {
+    return {
+      title: 'Realworld-NuxtJs'
     }
   }
 }

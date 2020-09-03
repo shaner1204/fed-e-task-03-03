@@ -56,7 +56,7 @@
               </li>
             </ul>
           </div>
-          <div>
+          <div v-if="articles.length !== 0">
             <div 
               class="article-preview"
               v-for="article in articles"
@@ -137,7 +137,10 @@
             </nav>
             <!-- 分页列表 -->
           </div>
+          <div class="no" v-else>
+            No Feed Articles……
           </div>
+        </div>
           
 
         <div class="col-md-3">
@@ -188,7 +191,7 @@ export default {
     const [ articleRes, tagRes] = await Promise.all([
       loadArticles({
         limit,
-        offset: (page - 1) * 2,
+        offset: (page - 1) * limit,
         tag: query.tag
       }),
       getTags()
@@ -199,7 +202,6 @@ export default {
       article.favoriteDisabled = false
       article.followDisabled = false
     })
-    // console.log(articles, 'articles')
     return {
       // articles: data.articles,
       // articlesCount: data.articlesCount,
@@ -222,7 +224,6 @@ export default {
   },
   methods: {
     async onFavorite (article) {
-      console.log(article)
       article.favoriteDisabled = true
       if (article.favorited) {
         // 取消点赞
@@ -236,6 +237,11 @@ export default {
         article.favoritesCount += 1
       }
       article.favoriteDisabled = false
+    }
+  },
+  head () {
+    return {
+      title: 'Realworld-NuxtJs'
     }
   }
 }

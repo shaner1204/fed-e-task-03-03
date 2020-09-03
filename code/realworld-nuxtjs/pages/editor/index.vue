@@ -72,14 +72,16 @@ export default {
         this.inputDisabled = true
         const tagList = this.tags.split(' ')
         this.article.tagList = tagList
-        console.log(this.article, 'article')
         const { data } = this.isUpdate !== '' ? await updateArticleApi(this.$route.params.slug, this.article) : await publishArticleApi({ article: this.article })
         if (data.article.author) {
           this.inputDisabled = false
-          this.$router.push('/')
+          if (this.isUpdate !== '') {
+            this.$router.push({name: 'article', params: {slug: this.isUpdate}})
+          } else {
+            this.$router.push('/')
+          }
         }
       } catch (err) {
-        console.log(err)
         this.errors = err.response.data.errors
       }
     },
@@ -87,6 +89,11 @@ export default {
       const { data } = await getArticle(this.$route.params.slug)
       this.article = data.article
       this.tags = data.article.tagList.join(' ')
+    }
+  },
+  head () {
+    return {
+      title: 'Realworld-NuxtJs'
     }
   }
 }

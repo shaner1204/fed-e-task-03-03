@@ -54,7 +54,6 @@ export default {
   name: 'ArticleIndex',
   async asyncData ({ params }) {
     const { data } = await getArticle(params.slug)
-    console.log(data, '文章详情-getarticle')
     const { article } = data
     const md = new MarkdownIt()
     article.body = md.render(article.body)

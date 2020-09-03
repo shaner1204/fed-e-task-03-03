@@ -78,7 +78,6 @@ export default {
       ...mapState(['user'])
     },
     created () {
-      console.log(this.user, 'user')
       this.commnetList()
     },
     // async mounted () {
@@ -88,7 +87,6 @@ export default {
     methods: {
       async commnetList () {
         const { data } = await getArticleComments(this.article.slug)
-        console.log(data.comments, '评论列表')
         this.comments = data.comments
       },
       async addComment (article) {
