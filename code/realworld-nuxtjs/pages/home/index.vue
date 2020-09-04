@@ -224,19 +224,23 @@ export default {
   },
   methods: {
     async onFavorite (article) {
-      article.favoriteDisabled = true
-      if (article.favorited) {
-        // 取消点赞
-        await deleteFavorite(article.slug)
-        article.favorited = false
-        article.favoritesCount += -1
+      if (this.user) {
+        article.favoriteDisabled = true
+        if (article.favorited) {
+          // 取消点赞
+          await deleteFavorite(article.slug)
+          article.favorited = false
+          article.favoritesCount += -1
+        } else {
+          // 添加点赞
+          await addFavorite(article.slug)
+          article.favorited = true
+          article.favoritesCount += 1
+        }
+        article.favoriteDisabled = false
       } else {
-        // 添加点赞
-        await addFavorite(article.slug)
-        article.favorited = true
-        article.favoritesCount += 1
+        this.$router.push({name: 'login'})
       }
-      article.favoriteDisabled = false
     }
   },
   head () {

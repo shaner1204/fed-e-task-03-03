@@ -24,7 +24,7 @@
         <span class="date">{{article.createdAt | date('MMM DD, YYYY')}}</span>
     </div>
     <!-- 本人文章显示，编辑与删除 -->
-    <span v-if="user.username === article.author.username">
+    <span v-if="user && user.username === article.author.username">
         <nuxt-link 
             class="btn btn-outline-secondary btn-sm" 
             :to="{
@@ -73,7 +73,7 @@
 import { addFollow, deleteFollow, addFavorite, deleteFavorite, deleteArticleApi } from '@/api/article'
 import { mapState } from 'vuex'
 export default {
-    name: 'articleMeto',
+    name: 'articleMeta',
     props: {
         article: {
             type: Object,
@@ -91,30 +91,38 @@ export default {
     },
     methods: {
         async onFollow (article) {
-            article.followDisabled = true
-            if (article.author.following) {
-                await deleteFollow(article.author.username)
-                article.author.following = false
+            if (this.user) {
+                article.followDisabled = true
+                if (article.author.following) {
+                    await deleteFollow(article.author.username)
+                    article.author.following = false
+                } else {
+                    await addFollow(article.author.username)
+                    article.author.following = true
+                }
+                article.followDisabled = false
             } else {
-                await addFollow(article.author.username)
-                article.author.following = true
+                this.$router.push({name: 'login'})
             }
-            article.followDisabled = false
         },
         async onFavorite (article) {
-            article.favoriteDisabled = true
-            if (article.favorited) {
-                // 取消点赞
-                await deleteFavorite(article.slug)
-                article.favorited = false
-                article.favoritesCount += -1
+            if (this.user) {
+                article.favoriteDisabled = true
+                if (article.favorited) {
+                    // 取消点赞
+                    await deleteFavorite(article.slug)
+                    article.favorited = false
+                    article.favoritesCount += -1
+                } else {
+                    // 添加点赞
+                    await addFavorite(article.slug)
+                    article.favorited = true
+                    article.favoritesCount += 1
+                }
+                article.favoriteDisabled = false
             } else {
-                // 添加点赞
-                await addFavorite(article.slug)
-                article.favorited = true
-                article.favoritesCount += 1
+                this.$router.push({name: 'login'})
             }
-            article.favoriteDisabled = false
         },
         async delArticleFn (slug) {
             try {

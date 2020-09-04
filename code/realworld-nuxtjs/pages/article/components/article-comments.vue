@@ -1,18 +1,18 @@
 <template>
   <div>
       <form class="card comment-form">
-          <div class="card-block">
-            <textarea class="form-control" placeholder="Write a comment..." rows="3" v-model="commentTxt"></textarea>
-          </div>
-          <div class="card-footer">
-            <img :src="article.author.image" class="comment-author-img" />
-            <button class="btn btn-sm btn-primary"
-              @click.prevent.stop="addComment(article)"
-            >
-             Post Comment
-            </button>
-          </div>
-        </form>
+        <div class="card-block">
+          <textarea class="form-control" placeholder="Write a comment..." rows="3" v-model="commentTxt"></textarea>
+        </div>
+        <div class="card-footer">
+          <img :src="article.author.image" class="comment-author-img" />
+          <button class="btn btn-sm btn-primary"
+            @click.prevent.stop="addComment(article)"
+          >
+            Post Comment
+          </button>
+        </div>
+      </form>
         
         <div class="card"
           v-for="(comment, index) in comments"
@@ -47,7 +47,7 @@
             <span class="mod-options">
               <!-- <i class="ion-edit"></i> -->
               <i class="ion-trash-a" 
-                v-if="user.username === comment.author.username" 
+                v-if="user && user.username === comment.author.username" 
                 @click="delCommentFn(article, comment.id)"
               ></i>
             </span>
@@ -80,28 +80,27 @@ export default {
     created () {
       this.commnetList()
     },
-    // async mounted () {
-    //   const { data } = await getArticleComments(this.article.slug)
-    //   this.comments = data.comments
-    // },
     methods: {
       async commnetList () {
         const { data } = await getArticleComments(this.article.slug)
         this.comments = data.comments
       },
       async addComment (article) {
-        try {
-          const { data } = await addArticleComments(article, {
-            comment: {
-              body: this.commentTxt
-            }
-          })
-          this.commentTxt = ''
-          this.commnetList()
-        } catch (err) {
-          console.log(err.response.data.errors)
+        if (this.user) {
+          try {
+            const { data } = await addArticleComments(article, {
+              comment: {
+                body: this.commentTxt
+              }
+            })
+            this.commentTxt = ''
+            this.commnetList()
+          } catch (err) {
+            console.log(err.response.data.errors)
+          }
+        } else {
+          this.$router.push({name: 'login'})
         }
-        
       },
       async delCommentFn (article, id) {
         try {

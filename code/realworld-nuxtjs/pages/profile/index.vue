@@ -7,7 +7,7 @@
 
         <div class="col-xs-12 col-md-10 offset-md-1">
           <img :src="profile.image" class="user-img" />
-          <h4>{{profile.name}}</h4>
+          <h4>{{profile.username}}</h4>
           <p>
             {{profile.bio}}
           </p>
@@ -16,6 +16,7 @@
             :to="{
               name: 'settings'
             }"
+            v-if="user && user.username === profile.username"
           >
             <i class="ion-gear-a"></i> Edit Profile Settings
           </nuxt-link>
@@ -151,6 +152,7 @@
 <script>
 import { getUserProfile } from '@/api/user'
 import { getArticles, addFavorite, deleteFavorite } from '@/api/article'
+import { mapState } from 'vuex'
 export default {
   // 在路由匹配组件渲染之前 会先执行中间件
   middleware: 'authenticated',
@@ -189,7 +191,8 @@ export default {
   computed: {
     totalPage () {
       return Math.ceil(this.articlesCount / this.limit)
-    }
+    },
+    ...mapState(['user'])
   },
   methods: {
     async onFavorite (article) {
